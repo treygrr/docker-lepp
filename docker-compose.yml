@@ -11,6 +11,8 @@ services:
         environment: 
             - DOCKER_NGINX_HOST=${DOCKER_NGINX_HOST}
             - DOCKER_NGINX_PORT=${DOCKER_NGINX_PORT}
+        links:
+            - "db:database"
         networks:
             common: 
     php:
@@ -23,6 +25,8 @@ services:
             - ${DOCKER_PHP_ENV_INI_FILE}:/usr/local/etc/php/conf.d/php-env-config.ini
             - ./php/fpm-www.conf:/usr/local/etc/php-fpm.d/www.conf
             - ./app:/app
+        links: 
+            - "db:database"
         networks:
             common: 
 
@@ -43,5 +47,7 @@ services:
         restart: always
         ports:
         - 9191:8080
+        networks:
+            common:
 networks:
     common:
