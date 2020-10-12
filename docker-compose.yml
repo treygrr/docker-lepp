@@ -1,0 +1,47 @@
+services:
+    web:
+        image: treydwg/nginx:latest
+        container_name: nginx
+        volumes:
+            - ${DOCKER_NGINX_CONF_FILE}:/etc/nginx/templates/template.template
+            - ${DOCKER_NGINX_CONF_SERVER_FILE}:/etc/nginx/conf.d/default.conf
+            - ./app:/app
+        ports:
+            - ${DOCKER_NGINX_DEV_PORT}:80
+        environment: 
+            - DOCKER_NGINX_HOST=${DOCKER_NGINX_HOST}
+            - DOCKER_NGINX_PORT=${DOCKER_NGINX_PORT}
+        networks:
+            common: 
+    php:
+        image: treydwg/php7.4-fpm-alpine:latest
+        container_name: php
+        environment:
+            HOSTNAME: php
+        volumes:
+            - ./php/php-custom-config.ini:/usr/local/etc/php/conf.d/php-custom-config.ini
+            - ${DOCKER_PHP_ENV_INI_FILE}:/usr/local/etc/php/conf.d/php-env-config.ini
+            - ./php/fpm-www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ./app:/app
+        networks:
+            common: 
+
+    db:
+        image: postgres
+        container_name: postgres
+        restart: always
+        environment: 
+            POSTGRES_DB: ${DOCKER_POSTGRES_DB}
+            POSTGRES_USER: ${DOCKER_POSTGRES_USER}
+            POSTGRES_PASSWORD: ${DOCKER_POSTGRES_PASSWORD}
+        networks:
+            common: 
+
+    adminer:
+        image: adminer
+        container_name: adminer
+        restart: always
+        ports:
+        - 9191:8080
+networks:
+    common:
