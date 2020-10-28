@@ -34,6 +34,8 @@ services:
         image: postgres
         container_name: postgres
         restart: always
+        ports:
+            - "5432:5432"
         environment: 
             POSTGRES_DB: ${DOCKER_POSTGRES_DB}
             POSTGRES_USER: ${DOCKER_POSTGRES_USER}
