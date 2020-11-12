@@ -63,3 +63,11 @@ Most configuration can be modified in the .env file of this projects root direct
 
 - This command can be used to clean up the old container from the previous command.
 
+## Getting Started with a new Application
+
+1. Copy .example.env to .env (If you are in windows you must do this in powershell or in vscode)
+2. Change ```DOCKER_NGINX_HOST=testsite.test``` to what ever url you would like for example ```DOCKER_NGINX_HOST=dieselapi.net```
+    - 2.a If you are on a windows machine add the domain you assigned to the env variable DOCKER_NGINX_HOST to your windows hosts file. This is usually located at ```C:\Windows\System32\drivers\etc```
+        - ex: ```127.0.0.1 dieselapi.net```
+3. If you choose to modify your postgres db credentials you can modify them in the .env file under DOCKER_POSTGRES_*
+4. 
