@@ -69,6 +69,8 @@ Most configuration can be modified in the .env file of this projects root direct
 2. Change ```DOCKER_NGINX_HOST=testsite.test``` to what ever url you would like for example ```DOCKER_NGINX_HOST=dieselapi.net```
     - 2.a If you are on a windows machine add the domain you assigned to the env variable DOCKER_NGINX_HOST to your windows hosts file. This is usually located at ```C:\Windows\System32\drivers\etc```
         - ex: ```127.0.0.1 dieselapi.net```
+    - 2.b Add this as well for local development purposes:
+      - ex: ```127.0.0.1 postgres```
 3. If you choose to modify your postgres db credentials you can modify them in the .env file under the DOCKER_POSTGRES_* environment variables.
 4. By default Nginx will look for your project file according to the root declaration in the Nginx site configuration file located in ```./nginx/siteconfig.conf``` file. 
     - If you are building a laravel application be sure to change the path of the root inside the nginx site configuration file to the path of your laravel project. 
