@@ -66,6 +66,7 @@ Most configuration can be modified in the .env file of this projects root direct
 ## Getting Started with a new Application
 
 1. Copy .example.env and rename it to .env (If you are in windows you must do this in powershell or in vscode because windows doesn't like files that start with symbols)
+    - 1.a Change ```DOCKER_CONTAINER_PREFIX``` to a shortname of your app. This will stop docker containers from interacting with each other and ensure that they all have their own instance.
 2. Change ```DOCKER_NGINX_HOST=testsite.test``` to what ever url you would like for example ```DOCKER_NGINX_HOST=dieselapi.net```
     - 2.a If you are on a windows machine add the domain you assigned to the env variable DOCKER_NGINX_HOST to your windows hosts file. This is usually located at ```C:\Windows\System32\drivers\etc```
         - ex: ```127.0.0.1 dieselapi.net```

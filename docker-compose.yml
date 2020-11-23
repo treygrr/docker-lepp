@@ -1,7 +1,7 @@
 services:
     web:
         image: treydwg/nginx:latest
-        container_name: nginx
+        container_name: ${DOCKER_CONTAINER_PREFIX}-nginx
         volumes:
             - ${DOCKER_NGINX_CONF_FILE}:/etc/nginx/templates/template.template
             - ${DOCKER_NGINX_CONF_SERVER_FILE}:/etc/nginx/conf.d/default.conf
@@ -17,7 +17,7 @@ services:
             common: 
     php:
         image: treydwg/php7.4-fpm-alpine:latest
-        container_name: php
+        container_name: ${DOCKER_CONTAINER_PREFIX}-php
         environment:
             HOSTNAME: php
         volumes:
@@ -32,7 +32,7 @@ services:
 
     db:
         image: postgres
-        container_name: postgres
+        container_name: ${DOCKER_CONTAINER_PREFIX}-postgres
         restart: always
         ports:
             - "${DOCKER_POSTGRES_LOCAL_PORT}:${DOCKER_POSTGRES_CONTAINER_PORT}"
@@ -45,7 +45,7 @@ services:
 
     adminer:
         image: adminer
-        container_name: adminer
+        container_name: ${DOCKER_CONTAINER_PREFIX}-adminer
         restart: always
         ports:
         - 9191:8080
