@@ -79,6 +79,11 @@ Most configuration can be modified in the .env file of this projects root direct
     - 4.a Open the file from the project root directory with /nginx/siteconfigServer.conf. From here look towards line 32 for ```fastcgi_pass vin-php:9000;```
     vin-php:9000; needs to match your docker container name for PHP and it's port that was set eariler. So in this instance it looks like above.
 5. Run the command ```docker compose up -d```
+6. If you run into a server 500 error when trying to reach your API.
+  - 6.a SSH into the nginx container via ```docker exec -it {projectprefix}-nginx /bin/bash```
+  - 6.b Navigate to the project directory via ```cd app```
+  - 6.c Run ```composer install```
+  - 6.d Run ```php artisan key:generate```
 
 ## Database
 
