@@ -84,10 +84,6 @@ Most configuration can be modified in the .env file of this projects root direct
 
 By default the database in configured to port forward local connections to the containers internal network based on the standard postgres port of 5432. This can be changed inside of the .env file at ```DOCKER_POSTGRES_LOCAL_PORT``` if you desire a different functioning local machine port.
 
-## Database admin
-
-In order to log into the database admin panel included with this project (adminer) on your local machine you must use the container name for the server address. In this case the container is named postgres, so in the field fill it out as you normally would to log in. Using the credentials provided for your postgres database in the .env file you created. Where the form asks for server simply input postgres.
-
 # Overview of database management
 
 In this docker project there is a visual database management software bundled into the compose file called pgAdmin. Once you are up and running, you can connect to the docker container that is holding our postgres database via it's container name. For ex: vin-postgres or {prefix}-postgres
