@@ -7,10 +7,10 @@ services:
             - ${DOCKER_NGINX_CONF_SERVER_FILE}:/etc/nginx/conf.d/default.conf
             - ./app:/app
         ports:
-            - ${DOCKER_NGINX_DEV_PORT}:${DOCKER_NGINX_CONTAINER_PORT}
+            - ${DOCKER_NGINX_DEV_PORT}:80
         environment: 
             - DOCKER_NGINX_HOST=${DOCKER_NGINX_HOST}
-            - DOCKER_NGINX_PORT=${DOCKER_NGINX_CONTAINER_PORT}
+            - DOCKER_NGINX_PORT=${DOCKER_NGINX_PORT}
         links:
             - "db:database"
         networks:
@@ -34,21 +34,29 @@ services:
         image: postgres
         container_name: ${DOCKER_CONTAINER_PREFIX}-postgres
         restart: always
+        volumes:
+            - ./postgres-data:/var/lib/postgresql/data
+            - ./postgres-data-dump:/backups
         ports:
-            - "${DOCKER_POSTGRES_DEV_PORT}:${DOCKER_POSTGRES_CONTAINER_PORT}"
+            - "${DOCKER_POSTGRES_LOCAL_PORT}:${DOCKER_POSTGRES_CONTAINER_PORT}"
         environment: 
             POSTGRES_DB: ${DOCKER_POSTGRES_DB}
             POSTGRES_USER: ${DOCKER_POSTGRES_USER}
             POSTGRES_PASSWORD: ${DOCKER_POSTGRES_PASSWORD}
         networks:
             common: 
-
-    adminer:
-        image: adminer
-        container_name: ${DOCKER_CONTAINER_PREFIX}-adminer
+    
+    pgadmin:
+        container_name: ${DOCKER_CONTAINER_PREFIX}-pgadmin4
+        image: dpage/pgadmin4
+        volumes:
+            - ./pgadmin:/root/.pgadmin
         restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@admin.com
+            PGADMIN_DEFAULT_PASSWORD: root
         ports:
-        - "${DOCKER_ADMINER_DEV_PORT}:${DOCKER_ADMINER_CONTAINER_PORT}"
+        - "5050:80"
         networks:
             common:
 networks:
