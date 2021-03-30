@@ -22,7 +22,7 @@ services:
             HOSTNAME: php
         volumes:
             - ./php/php-custom-config.ini:/usr/local/etc/php/conf.d/php-custom-config.ini
-            - ${DOCKER_PHP_ENV_INI_FILE}:/usr/local/etc/php/conf.d/php-env-config.ini
+            - ${DOCKER_PHP_INI_FILE}:/usr/local/etc/php/conf.d/php-env-config.ini
             - ./php/fpm-www.conf:/usr/local/etc/php-fpm.d/www.conf
             - ./app:/app
         links: 
@@ -36,7 +36,6 @@ services:
         restart: always
         volumes:
             - ./postgres-data:/var/lib/postgresql/data
-            - ./postgres-data-dump:/backups
         ports:
             - "${DOCKER_POSTGRES_LOCAL_PORT}:${DOCKER_POSTGRES_CONTAINER_PORT}"
         environment: 
@@ -47,17 +46,18 @@ services:
             common: 
     
     pgadmin:
-        container_name: ${DOCKER_CONTAINER_PREFIX}-pgadmin4
-        image: dpage/pgadmin4
+        container_name: ${DOCKER_CONTAINER_PREFIX}-pgadmin
+        image: treydwg/pgadmin
         volumes:
-            - ./pgadmin:/root/.pgadmin
+            - ./pgadmin-backups:/var/lib/pgadmin
         restart: always
         environment:
-            PGADMIN_DEFAULT_EMAIL: admin@admin.com
-            PGADMIN_DEFAULT_PASSWORD: root
+            PGADMIN_DEFAULT_EMAIL: ${DOCKER_PGADMIN_DEFAULT_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${DOCKER_PGADMIN_DEFAULT_PASSWORD}
         ports:
         - "5050:80"
         networks:
             common:
 networks:
     common:
+    
