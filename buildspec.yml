@@ -1,0 +1,8 @@
+version: 0.2
+phases:
+  build:
+    commands:
+artifacts:
+  files:
+    - '**/*'
+  name: builds/$CODEBUILD_BUILD_NUMBER/my-artifacts

@@ -1,0 +1,23 @@
+{
+  "name": "docker-lepp",
+  "version": "1.0.0",
+  "description": "A docker-lepp stack with easy setup",
+  "main": "setup.js",
+  "scripts": {
+    "test": "node setup.js",
+    "nginx": "cd shellscripts && bash ./nginx.sh",
+    "postgres": "cd shellscripts && bash ./postgres.sh",
+    "pgadmin": "cd shellscripts && bash ./pgadmin.sh",
+    "php": "cd shellscripts && bash ./php.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/treygrr/app-diesel-vin.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/treygrr/app-diesel-vin/issues"
+  },
+  "homepage": "https://github.com/treygrr/app-diesel-vin#readme"
+}
