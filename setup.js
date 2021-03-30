@@ -123,7 +123,7 @@ async function installLaravel(data) {
          return
     }
     console.log('Running Laravel installer. This might take a moment.')
-    execSync("cd ./shellscripts && ls && installLaravel.sh", (error, stdout, stderr) => {
+    execSync("bash -c 'cd ./shellscripts && ls && installLaravel.sh'", (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
