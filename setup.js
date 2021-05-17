@@ -86,7 +86,7 @@ function createDockerScripts (data) {
     let pgadmin = `#!/bin/bash\ndocker exec -it ${data.prefix}-pgadmin bash`
     let php = `#!/bin/bash\ndocker exec -it ${data.prefix}-php sh`
     let update = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && ls && composer install"`
-    let laravel = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel . && cd ../ && chmod -R a+rwx app"`
+    let laravel = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel ${data.prefix} && mv ${data.prefix}/{.,}* /app && cd ../ && chmod -R a+rwx app && rm -r ${data.prefix}"`
     fs.writeFileSync('./shellscripts/nginx.sh', nginx, 'utf8')
     fs.writeFileSync('./shellscripts/postgres.sh', postgres, 'utf8')
     fs.writeFileSync('./shellscripts/pgadmin.sh', pgadmin, 'utf8')
@@ -96,11 +96,6 @@ function createDockerScripts (data) {
     console.log('Docker ssh scripts created!')
 }
 async function startDocker (data) {
-    correct = await q.ask('Is it okay for us to attempt to start docker?')||'y'
-    correct.toLowerCase()
-    if (correct !== 'yes' && correct !== 'y') {
-        return
-    }
     var spawn = require('child_process').spawn
     var ls = spawn('docker-compose', ['up', '-d']);
     console.log('Running Docker installer. This might take a moment.')
@@ -120,12 +115,6 @@ async function startDocker (data) {
 }
 
 const installLaravel  = async (data) => {
-    let correct = await q.ask('Would you like to install Laravel in this project as well?')||'y'
-    correct = correct.toLowerCase()
-    if (correct !== 'yes' && correct !== 'y') {
-         main()
-         return
-    }
     var spawn = require('child_process').spawn
     var ls = spawn('bash', ['-c', 'cd shellscripts && ls && ./installLaravel.sh']);
     console.log('Running Laravel installer. This might take a moment.')
