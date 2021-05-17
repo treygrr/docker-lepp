@@ -1,12 +1,13 @@
 const q = require('./nodesetup/question')
 const fs = require('fs')
-const { execSync, exec } = require("child_process")
+const { execSync, exec } = require("child_process");
+const { start } = require('repl');
 
 console.log('Welcome to the docker-lepp setup. Let me ask you a few questions. CTL+C to exit.');
 function createENVstring(data) {
 return `DOCKER_CONTAINER_PREFIX=${data.prefix}
 
-DOCKER_NGINX_PORT=${data.prefix}
+DOCKER_NGINX_PORT=${data.nginx}
 DOCKER_NGINX_DEV_PORT=${data.nginx_dev_port}
 DOCKER_NGINX_HOST=${data.nginx_host}
 DOCKER_NGINX_CONF_FILE=${data.nginx_conf_file_location}
@@ -34,17 +35,11 @@ async function checkIfCorrect(data) {
     fs.writeFileSync('.env', createENVstring(data))
     updateNginxConf(data)
     createDockerScripts(data)
-    correct = await q.ask('Is it okay for us to attempt to start docker? Then auto install composer files and generate your laravel project key?')||'y'
-    if (correct !== 'yes' && correct !== 'y') {
-        return
-    }
     startDocker(data)
-    installLaravel()
     
 }
-
-async function main() {
-    let data = {}
+let data = {}
+const main  = async () => {
     data.prefix = await q.ask('What will the prefix to this project be? \nTry and abbreviate long words like tructfaultcodes to just tfc for brevitys sake (ex: vin, ti)')||'template'
     data.nginx = await q.ask('What port would you like Nginx to be open to inside the container? (default: 80)')||80
     data.nginx_dev_port = await q.ask('What port would you like Nginx to be available in your browser at? (default: 1738)')||1738
@@ -71,13 +66,27 @@ function updateNginxConf (data) {
     fs.writeFileSync('./nginx/siteconfigServer.conf', newText, 'utf8')
 }
 
+function updatePHPConf (data) {
+    const content = fs.readFileSync("./app/.env", 'utf-8');
+    console.log('Reading laravel env config server file')
+    let newText = content.replace('DB_CONNECTION=mysql', `DB_CONNECTION=pgsql`)
+    newText = newText.replace('DB_HOST=127.0.0.1', `DB_HOST=${data.prefix}-postgres`)
+    newText = newText.replace('DB_PORT=3306', `DB_PORT=5432`)
+    newText = newText.replace('DB_DATABASE=laravel', `DB_DATABASE=${data.postgres_database}`)
+    newText = newText.replace('DB_USERNAME=root', `DB_USERNAME=${data.postgres_user}`)
+    newText = newText.replace('DB_PASSWORD=', `DB_PASSWORD=${data.postgres_password}`)
+    
+    console.log('Updated laravel env config server file with database credentials based on settings provided.')
+    fs.writeFileSync('./app/.env', newText, 'utf8')
+}
+
 function createDockerScripts (data) {
-    let nginx = `#!/bin/bash\ndocker exec -it ${data.prefix}-nginx bash`
+    let nginx = `#!/bin/bash\ndocker exec -it ${data.prefix}-nginx bash -c "cd app"`
     let postgres = `#!/bin/bash\ndocker exec -it ${data.prefix}-postgres bash`
     let pgadmin = `#!/bin/bash\ndocker exec -it ${data.prefix}-pgadmin bash`
     let php = `#!/bin/bash\ndocker exec -it ${data.prefix}-php sh`
     let update = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && ls && composer install"`
-    let laravel = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel ${data.prefix} && mv ${data.prefix}/* /app"`
+    let laravel = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel . && cd ../ && chmod -R a+rwx app"`
     fs.writeFileSync('./shellscripts/nginx.sh', nginx, 'utf8')
     fs.writeFileSync('./shellscripts/postgres.sh', postgres, 'utf8')
     fs.writeFileSync('./shellscripts/pgadmin.sh', pgadmin, 'utf8')
@@ -86,55 +95,53 @@ function createDockerScripts (data) {
     fs.writeFileSync('./shellscripts/installLaravel.sh', laravel, 'utf8')
     console.log('Docker ssh scripts created!')
 }
-function startDocker (data) {
-    console.log('Starting docker containers.')
-    execSync("docker-compose up -d", (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
+async function startDocker (data) {
+    correct = await q.ask('Is it okay for us to attempt to start docker?')||'y'
+    correct.toLowerCase()
+    if (correct !== 'yes' && correct !== 'y') {
+        return
+    }
+    var spawn = require('child_process').spawn
+    var ls = spawn('docker-compose', ['up', '-d']);
+    console.log('Running Docker installer. This might take a moment.')
+    ls.stdout.on('data', function (data) {
+        console.log(data.toString());
+      });
+      
+      ls.stderr.on('data', function (data) {
+        console.log(data.toString());
+      });
+      
+      ls.on('close', async function (code) {
+        console.log('child process exited with code ' + code.toString());
+        installLaravel(data)
     });
 
 }
-function installComposer(data) {
-    execSync("cd ./shellscripts && ls && update.sh", (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-    });
-    
-}
-async function installLaravel(data) {
+
+const installLaravel  = async (data) => {
     let correct = await q.ask('Would you like to install Laravel in this project as well?')||'y'
     correct = correct.toLowerCase()
     if (correct !== 'yes' && correct !== 'y') {
          main()
          return
     }
+    var spawn = require('child_process').spawn
+    var ls = spawn('bash', ['-c', 'cd shellscripts && ls && ./installLaravel.sh']);
     console.log('Running Laravel installer. This might take a moment.')
-    execSync("bash -c 'cd ./shellscripts && ls && installLaravel.sh'", (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
+    ls.stdout.on('data', function (data) {
+        console.log(data.toString());
+      });
+      
+      ls.stderr.on('data', function (data) {
+        console.log(data.toString());
+      });
+      
+      ls.on('exit', async function (code) {
+        console.log('child process exited with code ' + code.toString());
+        updatePHPConf(data);
+        q.exit();
     });
-    q.exit()
 }
 
 main()
