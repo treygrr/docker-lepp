@@ -4,7 +4,7 @@
   "description": "A docker-lepp stack with easy setup",
   "main": "setup.js",
   "scripts": {
-    "test": "node setup.js",
+    "setup": "node setup.js",
     "nginx": "cd shellscripts && bash ./nginx.sh",
     "postgres": "cd shellscripts && bash ./postgres.sh",
     "pgadmin": "cd shellscripts && bash ./pgadmin.sh",
