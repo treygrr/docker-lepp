@@ -1,1 +1,0 @@
-docker exec template-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel template && mv template/{.,}* /app && cd ../ && chmod -R a+rwx app && rm -r template"

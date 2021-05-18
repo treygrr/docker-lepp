@@ -1,1 +1,0 @@
-docker exec template-nginx bash -c "ls && cd ../app && ls && composer install"
