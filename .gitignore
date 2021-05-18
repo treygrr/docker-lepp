@@ -1,4 +1,5 @@
 .env
 /app/*
 /postgres-data
+/shellscripts/*
 /pgadmin-backups
