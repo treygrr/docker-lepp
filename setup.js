@@ -86,7 +86,7 @@ function createDockerScripts (data) {
     let pgadmin = `#!/bin/bash\ndocker exec -it ${data.prefix}-pgadmin bash`
     let php = `#!/bin/bash\ndocker exec -it ${data.prefix}-php sh`
     let update = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && ls && composer install"`
-    let laravel = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel ${data.prefix} && mv ${data.prefix}/{.,}* /app && cd ../ && chmod -R a+rwx app && rm -r ${data.prefix}"`
+    let laravel = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel ${data.prefix}"`
     fs.writeFileSync('./shellscripts/nginx.sh', nginx, 'utf8')
     fs.writeFileSync('./shellscripts/postgres.sh', postgres, 'utf8')
     fs.writeFileSync('./shellscripts/pgadmin.sh', pgadmin, 'utf8')
@@ -128,9 +128,28 @@ const installLaravel  = async (data) => {
       
       ls.on('exit', async function (code) {
         console.log('child process exited with code ' + code.toString());
-        updatePHPConf(data);
+        movefiles(data);
         q.exit();
     });
+
+    const movefiles = (data_setup) => {
+        var ls = spawn('bash', ['-c', `mv ${data_setup.prefix}/{.,}* /app && cd ../ && chmod -R a+rwx app && rm -r ${data_setup.prefix}`]);
+        console.log('Moving folders, and editing environment files: ')
+        ls.stdout.on('data', (data) => {
+            console.log(data.toString());
+          });
+          
+          ls.stderr.on('data', async (data) => {
+            console.log(data.toString());
+          });
+          
+          ls.on('exit', async (code) => {
+            console.log('child process exited with code ' + code.toString());
+            updatePHPConf(data_setup);
+            q.exit();
+        });
+    }
+
 }
 
 main()
