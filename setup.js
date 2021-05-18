@@ -85,15 +85,21 @@ function createDockerScripts (data) {
     let postgres = `#!/bin/bash\ndocker exec -it ${data.prefix}-postgres bash`
     let pgadmin = `#!/bin/bash\ndocker exec -it ${data.prefix}-pgadmin bash`
     let php = `#!/bin/bash\ndocker exec -it ${data.prefix}-php sh`
-    let update = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && ls && composer install"`
-    let laravel = `docker exec ${data.prefix}-nginx bash -c "ls && cd ../app && composer create-project laravel/laravel ${data.prefix}"`
+    let update = `docker exec ${data.prefix}-nginx bash -c "cd ../app && composer install"`
+    let laravel = `docker exec ${data.prefix}-nginx bash -c "cd ../app && composer create-project laravel/laravel ${data.prefix}"`
+    let move = `docker exec ${data.prefix}-nginx bash -c "mv /app/${data.prefix}/{.,}* /app"`
+    let permissions = `docker exec ${data.prefix}-nginx bash -c "chmod -R a+rwx ./app && chmod -R 777 ./app"`
+    let cleanup = `docker exec ${data.prefix}-nginx bash -c "rm -R ./app/${data.prefix}"`
     fs.writeFileSync('./shellscripts/nginx.sh', nginx, 'utf8')
     fs.writeFileSync('./shellscripts/postgres.sh', postgres, 'utf8')
     fs.writeFileSync('./shellscripts/pgadmin.sh', pgadmin, 'utf8')
     fs.writeFileSync('./shellscripts/php.sh', php, 'utf8')
     fs.writeFileSync('./shellscripts/update.sh', update, 'utf8')
     fs.writeFileSync('./shellscripts/installLaravel.sh', laravel, 'utf8')
-    console.log('Docker ssh scripts created!')
+    fs.writeFileSync('./shellscripts/move.sh', move, 'utf8')
+    fs.writeFileSync('./shellscripts/permissions.sh', permissions, 'utf8')
+    fs.writeFileSync('./shellscripts/cleanup.sh', cleanup, 'utf8')
+    console.log('Scripts created!')
 }
 async function startDocker (data) {
     var spawn = require('child_process').spawn
@@ -108,7 +114,7 @@ async function startDocker (data) {
       });
       
       ls.on('close', async function (code) {
-        console.log('child process exited with code ' + code.toString());
+        console.log('Docker containers running');
         installLaravel(data)
     });
 
@@ -116,7 +122,7 @@ async function startDocker (data) {
 
 const installLaravel  = async (data) => {
     var spawn = require('child_process').spawn
-    var ls = spawn('bash', ['-c', 'cd shellscripts && ls && ./installLaravel.sh']);
+    var ls = spawn('bash', ['-c', 'mkdir app && cd shellscripts && ./installLaravel.sh']);
     console.log('Running Laravel installer. This might take a moment.')
     ls.stdout.on('data', function (data) {
         console.log(data.toString());
@@ -127,14 +133,14 @@ const installLaravel  = async (data) => {
       });
       
       ls.on('exit', async function (code) {
-        console.log('child process exited with code ' + code.toString());
+        console.log('Laravel installer finished');
         movefiles(data);
         q.exit();
     });
 
     const movefiles = (data_setup) => {
-        var ls = spawn('bash', ['-c', `mv ${data_setup.prefix}/{.,}* /app && cd ../ && chmod -R a+rwx app && rm -r ${data_setup.prefix}`]);
-        console.log('Moving folders, and editing environment files: ')
+        var ls = spawn('bash', ['-c', `cd shellscripts && ./move.sh`]);
+        console.log('Moving folders: ')
         ls.stdout.on('data', (data) => {
             console.log(data.toString());
           });
@@ -144,12 +150,47 @@ const installLaravel  = async (data) => {
           });
           
           ls.on('exit', async (code) => {
-            console.log('child process exited with code ' + code.toString());
-            updatePHPConf(data_setup);
+            console.log('Folder moved');
+            permissions(data_setup);
             q.exit();
         });
     }
 
+    const permissions = (data_setup) => {
+        var ls = spawn('bash', ['-c', `cd shellscripts && ./permissions.sh`]);
+        console.log('Setting permissions')
+        ls.stdout.on('data', (data) => {
+            console.log(data.toString());
+          });
+          
+          ls.stderr.on('data', async (data) => {
+            console.log(data.toString());
+          });
+
+          ls.on('exit', async (code) => {
+            console.log('Permissions Set');
+            cleanup(data_setup);
+            q.exit(); 
+        });
+    }
+
+    const cleanup = (data_setup) => {
+        var ls = spawn('bash', ['-c', `cd shellscripts && ./cleanup.sh`]);
+        console.log('Cleaning project files ')
+        ls.stdout.on('data', (data) => {
+            console.log(data.toString());
+          });
+          
+          ls.stderr.on('data', async (data) => {
+            console.log(data.toString());
+          });
+          
+          ls.on('exit', async (code) => {
+            console.log('Cleanup finished');
+            updatePHPConf(data_setup);
+            q.exit();
+        });
+    }
 }
 
 main()
