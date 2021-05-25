@@ -81,12 +81,12 @@ function updatePHPConf (data) {
 }
 
 function createDockerScripts (data) {
-    let nginx = `#!/bin/bash\ndocker exec -it ${data.prefix}-nginx bash -c "cd app"`
+    let nginx = `#!/bin/bash\ndocker exec -it ${data.prefix}-nginx bash`
     let postgres = `#!/bin/bash\ndocker exec -it ${data.prefix}-postgres bash`
     let pgadmin = `#!/bin/bash\ndocker exec -it ${data.prefix}-pgadmin bash`
     let php = `#!/bin/bash\ndocker exec -it ${data.prefix}-php sh`
     let update = `docker exec ${data.prefix}-nginx bash -c "cd ../app && composer install"`
-    let laravel = `docker exec ${data.prefix}-nginx bash -c "cd ../app && composer create-project laravel/laravel ${data.prefix}"`
+    let laravel = `docker exec ${data.prefix}-nginx bash -c "composer create-project laravel/laravel /app/${data.prefix}"`
     let move = `docker exec ${data.prefix}-nginx bash -c "mv /app/${data.prefix}/{.,}* /app"`
     let permissions = `docker exec ${data.prefix}-nginx bash -c "chmod -R a+rwx ./app && chmod -R 777 ./app"`
     let cleanup = `docker exec ${data.prefix}-nginx bash -c "rm -R ./app/${data.prefix}"`
