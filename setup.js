@@ -91,14 +91,23 @@ function createDockerScripts (data) {
     let permissions = `docker exec ${data.prefix}-nginx bash -c "chmod -R a+rwx ./app && chmod -R 777 ./app"`
     let cleanup = `docker exec ${data.prefix}-nginx bash -c "rm -R ./app/${data.prefix}"`
     fs.writeFileSync('./shellscripts/nginx.sh', nginx, 'utf8')
+    fs.chmodSync('./shellscripts/nginx.sh', "755");
     fs.writeFileSync('./shellscripts/postgres.sh', postgres, 'utf8')
+    fs.chmodSync('./shellscripts/postgres.sh', "755");
     fs.writeFileSync('./shellscripts/pgadmin.sh', pgadmin, 'utf8')
+    fs.chmodSync('./shellscripts/pgadmin.sh', "755");
     fs.writeFileSync('./shellscripts/php.sh', php, 'utf8')
+    fs.chmodSync('./shellscripts/php.sh', "755");
     fs.writeFileSync('./shellscripts/update.sh', update, 'utf8')
+    fs.chmodSync('./shellscripts/update.sh', "755");
     fs.writeFileSync('./shellscripts/installLaravel.sh', laravel, 'utf8')
+    fs.chmodSync('./shellscripts/installLaravel.sh', "755");
     fs.writeFileSync('./shellscripts/move.sh', move, 'utf8')
+    fs.chmodSync('./shellscripts/move.sh', "755");
     fs.writeFileSync('./shellscripts/permissions.sh', permissions, 'utf8')
+    fs.chmodSync('./shellscripts/permissions.sh', "755");
     fs.writeFileSync('./shellscripts/cleanup.sh', cleanup, 'utf8')
+    fs.chmodSync('./shellscripts/cleanup.sh', "755");
     console.log('Scripts created!')
 }
 async function startDocker (data) {
